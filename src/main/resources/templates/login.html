@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - Fake News Reporter</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Fake News Reporter</h1>
+            <nav>
+                <a th:href="@{/}">Home</a>
+                <a th:href="@{/reports}">View Reports</a>
+                <a th:href="@{/report}">Report Fake News</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="login-container">
+            <h2>Admin Login</h2>
+            
+            <div th:if="${param.error}" class="alert alert-error">
+                Invalid username or password.
+            </div>
+            
+            <div th:if="${param.logout}" class="alert alert-success">
+                You have been logged out successfully.
+            </div>
+
+            <form th:action="@{/login}" method="post">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" required autofocus>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Login</button>
+                    <a th:href="@{/}" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 Fake News Reporter. Help fight misinformation.</p>
+        </div>
+    </footer>
+</body>
+</html>

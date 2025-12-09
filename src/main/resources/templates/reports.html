@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Reports - Fake News Reporter</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Fake News Reporter</h1>
+            <nav>
+                <a th:href="@{/}">Home</a>
+                <a th:href="@{/reports}">View Reports</a>
+                <a th:href="@{/report}">Report Fake News</a>
+                <a th:href="@{/login}">Admin Login</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <h2>Verified Fake News Reports</h2>
+        
+        <div th:if="${reports.isEmpty()}" class="no-reports">
+            <p>No verified reports yet.</p>
+        </div>
+        
+        <div class="reports-list" th:if="${!reports.isEmpty()}">
+            <div class="report-card" th:each="report : ${reports}">
+                <div class="report-header">
+                    <span class="category-badge" th:text="${report.category}"></span>
+                    <span class="date" th:text="${#temporals.format(report.approvedAt, 'MMM dd, yyyy')}"></span>
+                </div>
+                <h3 th:text="${report.newsSource}"></h3>
+                <p class="url">
+                    <strong>URL:</strong> 
+                    <a th:href="${report.url}" target="_blank" rel="noopener noreferrer" th:text="${report.url}"></a>
+                </p>
+                <p class="description" th:text="${report.description}"></p>
+                <div class="report-footer">
+                    <span class="verified">✓ Verified by Admin</span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 Fake News Reporter. Help fight misinformation.</p>
+        </div>
+    </footer>
+</body>
+</html>

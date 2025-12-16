@@ -9,6 +9,8 @@ A Spring Boot application for reporting and managing fake news sources. Users ca
 
 **This project is educational, for demonstration purposes only!**
 
+![infographics](infographics.png)
+
 ## Features
 
 - **Public Features:**

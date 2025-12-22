@@ -45,6 +45,9 @@ public class FakeNewsReport {
     @Column
     private String rejectedBy;
 
+    @Column(columnDefinition = "TEXT")
+    private String rejectionReason;
+
     public FakeNewsReport() {
         this.reportedAt = LocalDateTime.now();
     }
@@ -135,6 +138,14 @@ public class FakeNewsReport {
 
     public void setRejectedBy(String rejectedBy) {
         this.rejectedBy = rejectedBy;
+    }
+
+    public String getRejectionReason() {
+        return rejectionReason;
+    }
+
+    public void setRejectionReason(String rejectionReason) {
+        this.rejectionReason = rejectionReason;
     }
 
     public boolean isRejected() {

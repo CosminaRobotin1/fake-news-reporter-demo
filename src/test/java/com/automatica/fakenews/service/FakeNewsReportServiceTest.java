@@ -148,12 +148,13 @@ class FakeNewsReportServiceTest {
         report.setUrl("http://fakenews.com");
         report.setCategory("Politics");
         report.setApproved(false);
+        String reason = "This is a duplicate report.";
 
         when(reportRepository.findById(1L)).thenReturn(Optional.of(report));
         when(reportRepository.save(any(FakeNewsReport.class))).thenReturn(report);
 
         // When
-        reportService.rejectReport(1L, "admin");
+        reportService.rejectReport(1L, "admin", reason);
 
         // Then
         ArgumentCaptor<FakeNewsReport> captor = ArgumentCaptor.forClass(FakeNewsReport.class);
@@ -163,6 +164,7 @@ class FakeNewsReportServiceTest {
         assertFalse(savedReport.isApproved(), "Report should not be approved");
         assertEquals("admin", savedReport.getRejectedBy(), "Rejected by should be set to 'admin'");
         assertNotNull(savedReport.getRejectedAt(), "Rejected at timestamp should be set");
+        assertEquals(reason, savedReport.getRejectionReason(), "Rejection reason should be set");
     }
 
     @Test
@@ -171,7 +173,7 @@ class FakeNewsReportServiceTest {
         when(reportRepository.findById(999L)).thenReturn(Optional.empty());
 
         // When
-        reportService.rejectReport(999L, "admin");
+        reportService.rejectReport(999L, "admin", "Some reason");
 
         // Then
         verify(reportRepository, never()).save(any(FakeNewsReport.class));

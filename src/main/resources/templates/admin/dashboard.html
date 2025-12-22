@@ -47,7 +47,8 @@
                         <form th:action="@{/admin/approve/{id}(id=${report.id})}" method="post" style="display: inline;">
                             <button type="submit" class="btn btn-success">Approve</button>
                         </form>
-                        <form th:action="@{/admin/reject/{id}(id=${report.id})}" method="post" style="display: inline;">
+                        <form th:action="@{/admin/reject/{id}(id=${report.id})}" method="post" style="display: flex; gap: 8px; align-items: center;">
+                            <input type="text" name="reason" class="form-control" placeholder="Reason for rejection..." required>
                             <button type="submit" class="btn btn-warning">Reject</button>
                         </form>
                         <form th:action="@{/admin/delete/{id}(id=${report.id})}" method="post" style="display: inline;">
@@ -108,6 +109,9 @@
                         <a th:href="${report.url}" target="_blank" rel="noopener noreferrer" th:text="${report.url}"></a>
                     </p>
                     <p class="description" th:text="${report.description}"></p>
+                    <p class="rejection-reason" th:if="${report.rejectionReason != null and !report.rejectionReason.isEmpty()}">
+                        <strong>Reason:</strong> <span th:text="${report.rejectionReason}"></span>
+                    </p>
                     <div class="report-footer">
                         <span class="rejected-badge">✗ Rejected by: <span th:text="${report.rejectedBy}"></span></span>
                     </div>

@@ -53,13 +53,14 @@ public class FakeNewsReportService {
     }
 
     @Transactional
-    public void rejectReport(Long id, String rejectedBy) {
+    public void rejectReport(Long id, String rejectedBy, String rejectionReason) {
         Optional<FakeNewsReport> reportOpt = reportRepository.findById(id);
         if (reportOpt.isPresent()) {
             FakeNewsReport report = reportOpt.get();
             report.setApproved(false);
             report.setRejectedAt(LocalDateTime.now());
             report.setRejectedBy(rejectedBy);
+            report.setRejectionReason(rejectionReason);
             reportRepository.save(report);
         }
     }

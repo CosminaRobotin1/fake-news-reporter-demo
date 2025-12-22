@@ -42,6 +42,9 @@
                 <div class="report-footer">
                     <span class="verified" th:if="${report.approved}">✓ Verified by Admin</span>
                     <span class="rejected-badge" th:if="${report.rejected}">✗ Rejected by Admin</span>
+                    <div class="rejection-reason-user" th:if="${report.rejected and report.rejectionReason != null and !report.rejectionReason.isEmpty()}">
+                        <strong>Reason:</strong> <span th:text="${report.rejectionReason}"></span>
+                    </div>
                 </div>
             </div>
         </div>

@@ -1,5 +1,6 @@
 package com.automatica.fakenews.service;
 
+import com.automatica.fakenews.kafka.dto.FactCheckResponseMessage;
 import com.automatica.fakenews.model.FakeNewsReport;
 import com.automatica.fakenews.repository.FakeNewsReportRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +38,7 @@ public class FakeNewsReportService {
         return reportRepository.save(report);
     }
 
+
     @Transactional
     public void approveReport(Long id, String approvedBy) {
         Optional<FakeNewsReport> reportOpt = reportRepository.findById(id);
@@ -45,7 +47,6 @@ public class FakeNewsReportService {
             report.setApproved(true);
             report.setApprovedAt(LocalDateTime.now());
             report.setApprovedBy(approvedBy);
-            // Clear rejection fields if previously rejected
             report.setRejectedAt(null);
             report.setRejectedBy(null);
             reportRepository.save(report);
@@ -77,4 +78,44 @@ public class FakeNewsReportService {
     public void deleteReport(Long id) {
         reportRepository.deleteById(id);
     }
+
+    @Transactional
+    public void applyFactCheckResult(FactCheckResponseMessage msg) {
+
+        if (msg == null || msg.getReportId() == null) return;
+
+        Optional<FakeNewsReport> optReport = reportRepository.findById(msg.getReportId());
+        if (optReport.isEmpty()) return;
+
+        FakeNewsReport report = optReport.get();
+
+
+        if ("DONE".equalsIgnoreCase(report.getFactCheckStatus()) || "FAILED".equalsIgnoreCase(report.getFactCheckStatus())) {
+            return;
+        }
+
+
+        report.setFactCheckStatus(msg.getStatus() != null ? msg.getStatus() : "DONE"); //daca nu e null -> done/failed, daca e null -> default done
+
+        // rezultatele factcheck
+
+        report.setFactCheckRequestId(msg.getRequestId());
+        report.setFactCheckVerdict(msg.getVerdict());
+        report.setFactCheckConfidence(msg.getConfidence());
+        report.setFactCheckProvider(msg.getProvider());
+        report.setFactCheckPublisher(msg.getPublisher());
+        report.setFactCheckUrl(msg.getUrl());
+        report.setFactCheckRationale(msg.getRationale());
+        report.setFactCheckWhatToVerify(msg.getWhatToVerify());
+        report.setFactCheckErrorMessage(msg.getErrorMessage());
+
+        if ("DONE".equalsIgnoreCase(report.getFactCheckStatus())) {
+            report.setFactCheckErrorMessage(null);
+        }
+
+        reportRepository.save(report);
+
+    }
 }
+
+

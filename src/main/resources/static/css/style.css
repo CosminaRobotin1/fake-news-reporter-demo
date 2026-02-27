@@ -404,4 +404,14 @@ footer {
     .form-actions .btn {
         width: 100%;
     }
+
+    button:disabled,
+    .btn:disabled,
+    button[disabled],
+    .btn[disabled] {
+        opacity: 0.45 !important;
+        cursor: not-allowed !important;
+        pointer-events: none !important;
+        filter: grayscale(60%) !important;
+    }
 }

@@ -13,3 +13,29 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
 
+  kafka:
+    bootstrap-servers: localhost:9092
+
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+    consumer:
+      group-id: fakenews-webapp
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+        spring.json.use.type.headers: false
+        spring.json.value.default.type: com.automatica.fakenews.kafka.dto.FactCheckResponseMessage
+
+app:
+  kafka:
+    topics:
+      requests: factcheck.requests
+      responses: factcheck.responses
+
+factcheck:
+  base-url: https://factchecktools.googleapis.com/v1alpha1/claims:search
+  api-key: AIzaSyApJoGjWmqXqfyIJYaBB9QacJnOgf3l17M

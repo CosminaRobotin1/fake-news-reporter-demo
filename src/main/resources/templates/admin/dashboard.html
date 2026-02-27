@@ -43,13 +43,73 @@
                         <a th:href="${report.url}" target="_blank" rel="noopener noreferrer" th:text="${report.url}"></a>
                     </p>
                     <p class="description" th:text="${report.description}"></p>
+
+                    <div class="factcheck-box">
+                        <p><strong>Fact-check status:</strong>
+                            <span th:text="${report.factCheckStatus}">PENDING</span>
+                        </p>
+
+                        <div th:if="${report.factCheckStatus == 'DONE'}">
+                            <p><strong>Verdict:</strong>
+                                <span th:text="${report.factCheckVerdict}"></span>
+                            </p>
+
+                            <p th:if="${report.factCheckConfidence != null}">
+                                <strong>Confidence:</strong>
+                                <span th:text="${report.factCheckConfidence}"></span>
+                            </p>
+
+                            <p><strong>Provider:</strong>
+                                <span th:text="${report.factCheckProvider}"></span>
+                            </p>
+
+                            <p th:if="${report.factCheckPublisher != null}">
+                                <strong>Publisher:</strong>
+                                <span th:text="${report.factCheckPublisher}"></span>
+                            </p>
+
+                            <p th:if="${report.factCheckUrl != null}">
+                                <strong>Fact-check URL:</strong>
+                                <a th:href="${report.factCheckUrl}" target="_blank"
+                                   th:text="${report.factCheckUrl}"></a>
+                            </p>
+
+                            <details th:if="${report.factCheckRationale != null}">
+                                <summary><strong>Rationale</strong></summary>
+                                <p th:text="${report.factCheckRationale}"></p>
+                            </details>
+
+                            <details th:if="${report.factCheckWhatToVerify != null}">
+                                <summary><strong>What to verify</strong></summary>
+                                <p th:text="${report.factCheckWhatToVerify}"></p>
+                            </details>
+                        </div>
+
+                        <div th:if="${report.factCheckStatus == 'FAILED'}">
+                            <p style="color: red;">
+                                <strong>Error:</strong>
+                                <span th:text="${report.factCheckErrorMessage}"></span>
+                            </p>
+                        </div>
+
+                        <div th:if="${report.factCheckStatus != 'DONE' and report.factCheckStatus != 'FAILED'}">
+                            <p><em>Waiting for fact-check result...</em></p>
+                        </div>
+                    </div>
+
                     <div class="admin-actions">
                         <form th:action="@{/admin/approve/{id}(id=${report.id})}" method="post" style="display: inline;">
-                            <button type="submit" class="btn btn-success">Approve</button>
+                            <button type="submit" class="btn btn-success"
+                                    th:disabled="${report.factCheckStatus == null or #strings.trim(report.factCheckStatus).toUpperCase() != 'DONE'}">
+                                Approve
+                            </button>
                         </form>
                         <form th:action="@{/admin/reject/{id}(id=${report.id})}" method="post" style="display: flex; gap: 8px; align-items: center;">
                             <input type="text" name="reason" class="form-control" placeholder="Reason for rejection..." required>
-                            <button type="submit" class="btn btn-warning">Reject</button>
+                            <button type="submit" class="btn btn-warning"
+                                    th:disabled="${report.factCheckStatus == null or #strings.trim(report.factCheckStatus).toUpperCase() != 'DONE'}">
+                                Reject
+                            </button>
                         </form>
                         <form th:action="@{/admin/delete/{id}(id=${report.id})}" method="post" style="display: inline;">
                             <button type="submit" class="btn btn-danger"
@@ -117,7 +177,10 @@
                     </div>
                     <div class="admin-actions">
                         <form th:action="@{/admin/approve/{id}(id=${report.id})}" method="post" style="display: inline;">
-                            <button type="submit" class="btn btn-success btn-sm">Approve</button>
+                            <button type="submit" class="btn btn-success"
+                                    th:disabled="${report.factCheckStatus == null or #strings.trim(report.factCheckStatus).toUpperCase() != 'DONE'}">
+                                Approve
+                            </button>
                         </form>
                         <form th:action="@{/admin/delete/{id}(id=${report.id})}" method="post" style="display: inline;">
                             <button type="submit" class="btn btn-danger btn-sm"

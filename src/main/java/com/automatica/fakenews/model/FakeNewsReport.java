@@ -3,7 +3,11 @@ package com.automatica.fakenews.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "fake_news_reports")
 public class FakeNewsReport {
@@ -48,9 +52,32 @@ public class FakeNewsReport {
     @Column(columnDefinition = "TEXT")
     private String rejectionReason;
 
+    //modificare pt ca  sa poata stoca rezultatul fact-check
+
+    @Column(nullable = false)
+    private String factCheckStatus = "PENDING";
+
+    private String factCheckVerdict;
+    private Double factCheckConfidence;
+    private String factCheckProvider; //google/gemini
+    private String factCheckPublisher;
+    private String factCheckUrl;
+
+    @Column(columnDefinition = "TEXT")
+    private String factCheckRationale;
+
+    @Column(columnDefinition = "TEXT")
+    private String factCheckWhatToVerify;
+
+    @Column(columnDefinition = "TEXT")
+    private String factCheckErrorMessage;
+
+    private String factCheckRequestId;
+
+
     public FakeNewsReport() {
         this.reportedAt = LocalDateTime.now();
-    }
+    }//Constructorul
 
     public Long getId() {
         return id;
@@ -142,11 +169,11 @@ public class FakeNewsReport {
 
     public String getRejectionReason() {
         return rejectionReason;
-    }
+    }//
 
     public void setRejectionReason(String rejectionReason) {
         this.rejectionReason = rejectionReason;
-    }
+    }//
 
     public boolean isRejected() {
         return !approved && rejectedAt != null;

@@ -32,9 +32,7 @@ public class AdminController {
     }
 
     @PostMapping("/approve/{id}")
-    public String approveReport(@PathVariable Long id,
-                                Authentication authentication,
-                                RedirectAttributes redirectAttributes) {
+    public String approveReport(@PathVariable Long id, Authentication authentication, RedirectAttributes redirectAttributes) {
         String username = authentication.getName();
         reportService.approveReport(id, username);
         redirectAttributes.addFlashAttribute("successMessage", "Report approved successfully!");
@@ -42,10 +40,7 @@ public class AdminController {
     }
 
     @PostMapping("/reject/{id}")
-    public String rejectReport(@PathVariable Long id,
-                               @RequestParam("reason") String rejectionReason,
-                               Authentication authentication,
-                               RedirectAttributes redirectAttributes) {
+    public String rejectReport(@PathVariable Long id, @RequestParam("reason") String rejectionReason, Authentication authentication, RedirectAttributes redirectAttributes) {
         String username = authentication.getName();
         reportService.rejectReport(id, username, rejectionReason);
         redirectAttributes.addFlashAttribute("successMessage", "Report rejected successfully!");
@@ -53,8 +48,7 @@ public class AdminController {
     }
 
     @PostMapping("/delete/{id}")
-    public String deleteReport(@PathVariable Long id, 
-                               RedirectAttributes redirectAttributes) {
+    public String deleteReport(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         reportService.deleteReport(id);
         redirectAttributes.addFlashAttribute("successMessage", "Report deleted successfully!");
         return "redirect:/admin/dashboard";

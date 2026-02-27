@@ -1,0 +1,34 @@
+factcheck:
+  base-url: https://factchecktools.googleapis.com/v1alpha1/claims:search
+  api-key: ${FACTCHECK_API_KEY}
+
+server:
+  port: 8081
+
+gemini:
+  api-key: ${GEMINI_API_KEY}
+  model: gemini-3-flash-preview
+
+spring:
+  kafka:
+    bootstrap-servers: localhost:9092
+
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+    consumer:
+      group-id: factcheck-worker
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: com.automatica.factcheckstandalone.kafka.dto
+        spring.json.use.type.headers: false
+        spring.json.value.default.type: com.automatica.factcheckstandalone.kafka.dto.FactCheckRequestMessage
+
+app:
+  kafka:
+    topics:
+      requests: factcheck.requests
+      responses: factcheck.responses

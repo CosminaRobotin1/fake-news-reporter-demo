@@ -1,0 +1,235 @@
+package com.automatica.fakenews.service;
+
+import com.automatica.fakenews.model.FakeNewsReport;
+import com.automatica.fakenews.repository.FakeNewsReportRepository;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
+class FakeNewsReportServiceTest {
+
+    @Mock
+    private FakeNewsReportRepository reportRepository;
+
+    @InjectMocks
+    private FakeNewsReportService reportService;
+
+    @Test
+    void testSaveReport_Success() {
+        // Given
+        FakeNewsReport report = new FakeNewsReport();
+        report.setNewsSource("Fake News Daily");
+        report.setUrl("http://fakenews.com");
+        report.setCategory("Politics");
+        report.setDescription("This is a fake news source");
+
+        when(reportRepository.save(any(FakeNewsReport.class))).thenReturn(report);
+
+        // When
+        FakeNewsReport savedReport = reportService.saveReport(report);
+
+        // Then
+        assertNotNull(savedReport);
+        verify(reportRepository, times(1)).save(report);
+        assertEquals("Fake News Daily", savedReport.getNewsSource());
+    }
+
+    @Test
+    void testApproveReport_SetsAllFields() {
+        // Given
+        FakeNewsReport report = new FakeNewsReport();
+        report.setId(1L);
+        report.setNewsSource("Fake News Daily");
+        report.setUrl("http://fakenews.com");
+        report.setCategory("Politics");
+        report.setApproved(false);
+
+        when(reportRepository.findById(1L)).thenReturn(Optional.of(report));
+        when(reportRepository.save(any(FakeNewsReport.class))).thenReturn(report);
+
+        // When
+        reportService.approveReport(1L, "admin");
+
+        // Then
+        ArgumentCaptor<FakeNewsReport> captor = ArgumentCaptor.forClass(FakeNewsReport.class);
+        verify(reportRepository).save(captor.capture());
+
+        FakeNewsReport savedReport = captor.getValue();
+        assertTrue(savedReport.isApproved(), "Report should be approved");
+        assertEquals("admin", savedReport.getApprovedBy(), "Approved by should be set to 'admin'");
+        assertNotNull(savedReport.getApprovedAt(), "Approved at timestamp should be set");
+    }
+
+    @Test
+    void testApproveReport_ReportNotFound_DoesNothing() {
+        // Given
+        when(reportRepository.findById(999L)).thenReturn(Optional.empty());
+
+        // When
+        reportService.approveReport(999L, "admin");
+
+        // Then
+        verify(reportRepository, never()).save(any(FakeNewsReport.class));
+    }
+
+    @Test
+    void testGetApprovedReports_DelegatesToRepository() {
+        // Given
+        FakeNewsReport report1 = new FakeNewsReport();
+        report1.setId(1L);
+        report1.setNewsSource("Source 1");
+        report1.setApproved(true);
+
+        FakeNewsReport report2 = new FakeNewsReport();
+        report2.setId(2L);
+        report2.setNewsSource("Source 2");
+        report2.setApproved(true);
+
+        List<FakeNewsReport> approvedReports = Arrays.asList(report1, report2);
+        when(reportRepository.findByApprovedTrueOrderByApprovedAtDesc()).thenReturn(approvedReports);
+
+        // When
+        List<FakeNewsReport> result = reportService.getApprovedReports();
+
+        // Then
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        assertTrue(result.get(0).isApproved());
+        assertTrue(result.get(1).isApproved());
+        verify(reportRepository, times(1)).findByApprovedTrueOrderByApprovedAtDesc();
+    }
+
+    @Test
+    void testGetPendingReports_DelegatesToRepository() {
+        // Given
+        FakeNewsReport report1 = new FakeNewsReport();
+        report1.setId(1L);
+        report1.setNewsSource("Pending Source 1");
+        report1.setApproved(false);
+
+        FakeNewsReport report2 = new FakeNewsReport();
+        report2.setId(2L);
+        report2.setNewsSource("Pending Source 2");
+        report2.setApproved(false);
+
+        List<FakeNewsReport> pendingReports = Arrays.asList(report1, report2);
+        when(reportRepository.findByApprovedFalseAndRejectedAtIsNullOrderByReportedAtDesc()).thenReturn(pendingReports);
+
+        // When
+        List<FakeNewsReport> result = reportService.getPendingReports();
+
+        // Then
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        assertFalse(result.get(0).isApproved());
+        assertFalse(result.get(1).isApproved());
+        verify(reportRepository, times(1)).findByApprovedFalseAndRejectedAtIsNullOrderByReportedAtDesc();
+    }
+
+    @Test
+    void testRejectReport_SetsAllFields() {
+        // Given
+        FakeNewsReport report = new FakeNewsReport();
+        report.setId(1L);
+        report.setNewsSource("Fake News Daily");
+        report.setUrl("http://fakenews.com");
+        report.setCategory("Politics");
+        report.setApproved(false);
+        String reason = "This is a duplicate report.";
+
+        when(reportRepository.findById(1L)).thenReturn(Optional.of(report));
+        when(reportRepository.save(any(FakeNewsReport.class))).thenReturn(report);
+
+        // When
+        reportService.rejectReport(1L, "admin", reason);
+
+        // Then
+        ArgumentCaptor<FakeNewsReport> captor = ArgumentCaptor.forClass(FakeNewsReport.class);
+        verify(reportRepository).save(captor.capture());
+
+        FakeNewsReport savedReport = captor.getValue();
+        assertFalse(savedReport.isApproved(), "Report should not be approved");
+        assertEquals("admin", savedReport.getRejectedBy(), "Rejected by should be set to 'admin'");
+        assertNotNull(savedReport.getRejectedAt(), "Rejected at timestamp should be set");
+        assertEquals(reason, savedReport.getRejectionReason(), "Rejection reason should be set");
+    }
+
+    @Test
+    void testRejectReport_ReportNotFound_DoesNothing() {
+        // Given
+        when(reportRepository.findById(999L)).thenReturn(Optional.empty());
+
+        // When
+        reportService.rejectReport(999L, "admin", "Some reason");
+
+        // Then
+        verify(reportRepository, never()).save(any(FakeNewsReport.class));
+    }
+
+    @Test
+    void testGetRejectedReports_DelegatesToRepository() {
+        // Given
+        FakeNewsReport report1 = new FakeNewsReport();
+        report1.setId(1L);
+        report1.setNewsSource("Rejected Source 1");
+        report1.setApproved(false);
+        report1.setRejectedAt(LocalDateTime.now());
+        report1.setRejectedBy("admin");
+
+        FakeNewsReport report2 = new FakeNewsReport();
+        report2.setId(2L);
+        report2.setNewsSource("Rejected Source 2");
+        report2.setApproved(false);
+        report2.setRejectedAt(LocalDateTime.now());
+        report2.setRejectedBy("admin");
+
+        List<FakeNewsReport> rejectedReports = Arrays.asList(report1, report2);
+        when(reportRepository.findByRejectedAtIsNotNullOrderByRejectedAtDesc()).thenReturn(rejectedReports);
+
+        // When
+        List<FakeNewsReport> result = reportService.getRejectedReports();
+
+        // Then
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        assertNotNull(result.get(0).getRejectedAt());
+        assertNotNull(result.get(1).getRejectedAt());
+        verify(reportRepository, times(1)).findByRejectedAtIsNotNullOrderByRejectedAtDesc();
+    }
+
+    @Test
+    void testGetPendingReports_ExcludesRejectedReports() {
+        // Given
+        FakeNewsReport pendingReport = new FakeNewsReport();
+        pendingReport.setId(1L);
+        pendingReport.setNewsSource("Pending Source");
+        pendingReport.setApproved(false);
+        pendingReport.setRejectedAt(null); // Pending, not rejected
+
+        List<FakeNewsReport> pendingReports = Arrays.asList(pendingReport);
+        when(reportRepository.findByApprovedFalseAndRejectedAtIsNullOrderByReportedAtDesc()).thenReturn(pendingReports);
+
+        // When
+        List<FakeNewsReport> result = reportService.getPendingReports();
+
+        // Then
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertNull(result.get(0).getRejectedAt());
+        assertFalse(result.get(0).isApproved());
+        verify(reportRepository, times(1)).findByApprovedFalseAndRejectedAtIsNullOrderByReportedAtDesc();
+    }
+}

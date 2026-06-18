@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<!-- Specifică faptul că este un document HTML5 -->
+
+<html xmlns:th="http://www.thymeleaf.org">
+<!-- Activează utilizarea atributelor Thymeleaf (th:text, th:if, th:each etc.) -->
+
+<head>
+
+    <meta charset="UTF-8">
+    <!-- Permite afișarea corectă a caracterelor speciale (ă, î, ș, ț) -->
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Face pagina responsive pe telefoane și tablete -->
+
+    <title>Fake News Reporter - Home</title>
+    <!-- Titlul afișat în tab-ul browserului -->
+
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <!-- Încarcă fișierul CSS pentru stilizarea paginii -->
+
+</head>
+
+<body>
+
+<header>
+    <!-- Antetul paginii -->
+
+    <div class="container">
+
+        <h1>Fake News Reporter</h1>
+        <!-- Titlul aplicației -->
+
+        <nav>
+            <!-- Meniu de navigare -->
+
+            <a th:href="@{/}">Home</a>
+            <!-- Deschide pagina principală -->
+
+            <a th:href="@{/reports}">View Reports</a>
+            <!-- Deschide pagina cu toate raportările -->
+
+            <a th:href="@{/report}">Report Fake News</a>
+            <!-- Deschide formularul de raportare -->
+
+            <a th:href="@{/login}">Admin Login</a>
+            <!-- Deschide pagina de login pentru administrator -->
+
+        </nav>
+
+    </div>
+
+</header>
+
+<main class="container">
+    <!-- Conținutul principal al paginii -->
+
+    <div th:if="${successMessage}"
+         class="alert alert-success"
+         th:text="${successMessage}">
+    </div>
+
+    <!--
+    Afișează un mesaj de succes dacă există atributul
+    successMessage trimis de controller
+    -->
+
+    <section class="hero">
+        <!-- Secțiunea principală afișată în partea de sus -->
+
+        <h2>Help Fight Misinformation</h2>
+        <!-- Titlul principal -->
+
+        <p>
+            Report fake news sources and help others identify unreliable information.
+        </p>
+        <!-- Descriere scurtă a aplicației -->
+
+        <a th:href="@{/report}" class="btn btn-primary">
+            Report Fake News
+        </a>
+        <!-- Buton care deschide formularul de raportare -->
+
+    </section>
+
+    <section class="reports-section">
+        <!-- Secțiunea care afișează raportările -->
+
+        <h3>Recently Processed Reports</h3>
+
+        <div th:if="${reports.isEmpty()}" class="no-reports">
+            <!-- Se afișează dacă lista reports este goală -->
+
+            <p>
+                No reports yet. Be the first to report fake news!
+            </p>
+
+        </div>
+
+        <div class="reports-grid"
+             th:if="${!reports.isEmpty()}">
+            <!-- Se afișează doar dacă există raportări -->
+
+            <div class="report-card"
+                 th:each="report : ${reports}"
+                 th:classappend="${report.rejected ? 'rejected-report' : ''}">
+
+                <!--
+                Pentru fiecare obiect report din lista reports
+                creează un card nou.
+                Dacă raportarea este respinsă,
+                adaugă clasa CSS rejected-report.
+                -->
+
+                <div class="report-header">
+
+                        <span class="category-badge"
+                              th:text="${report.category}">
+                        </span>
+
+                    <!-- Afișează categoria raportării -->
+
+                    <span class="date"
+                          th:text="${#temporals.format(report.approved ? report.approvedAt : report.rejectedAt, 'MMM dd, yyyy')}">
+                        </span>
+
+                    <!-- Afișează data aprobării sau respingerii -->
+
+                </div>
+
+                <h4 th:text="${report.newsSource}"></h4>
+                <!-- Afișează numele sursei știrii -->
+
+                <p class="url"
+                   th:text="${report.url}">
+                </p>
+                <!-- Afișează URL-ul raportat -->
+
+                <p class="description"
+                   th:text="${report.description}">
+                </p>
+                <!-- Afișează descrierea raportării -->
+
+                <div class="report-footer">
+
+                        <span class="verified"
+                              th:if="${report.approved}">
+                            ✓ Verified
+                        </span>
+
+                    <!-- Se afișează dacă raportarea a fost aprobată -->
+
+                    <span class="rejected-badge"
+                          th:if="${report.rejected}">
+                            ✗ Rejected by Admin
+                        </span>
+
+                    <!-- Se afișează dacă raportarea a fost respinsă -->
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+</main>
+
+<footer>
+    <!-- Subsolul paginii -->
+
+    <div class="container">
+
+        <p>
+            &copy; 2024 Fake News Reporter. Help fight misinformation.
+        </p>
+
+    </div>
+
+</footer>
+
+</body>
+
+</html>
